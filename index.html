@@ -2,115 +2,917 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuizQuest — Мини-ИИ Викторина</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Викторина</title>
+    
+    <!-- Шрифты и иконки -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Базовый сброс */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --accent: #f59e0b;
+            --accent-dark: #d97706;
+            --bg1: #fff2b3;
+            --bg2: #ffe68a;
+            --correct: #10b981;
+            --wrong: #ef4444;
+            --text-dark: #1f2937;
+            --text-light: #f9fafb;
+            --overlay: rgba(0, 0, 0, 0.5);
+            --card-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--bg1), var(--bg2));
+            color: var(--text-dark);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Основной контейнер */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Кнопка бургер-меню */
+        .burger-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 2px solid var(--accent);
+            color: var(--accent-dark);
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .burger-btn:hover {
+            transform: scale(1.1);
+            background: var(--accent);
+            color: white;
+        }
+
+        .burger-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Экран приветствия */
+        .welcome-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--accent-dark);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: var(--text-dark);
+            opacity: 0.8;
+        }
+
+        .input-group {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .name-input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            border: 3px solid var(--accent);
+            border-radius: 50px;
+            outline: none;
+            background: var(--card-bg);
+            transition: all 0.2s ease;
+        }
+
+        .name-input:focus {
+            border-color: var(--accent-dark);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+        }
+
+        .save-btn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .save-btn:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .save-btn:active {
+            transform: translateY(0);
+        }
+
+        .save-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Профиль */
+        .profile-screen {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .profile-card {
+            background: var(--card-bg);
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 2px solid var(--accent);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .profile-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-name h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .edit-name-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+            background: transparent;
+            color: var(--accent-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .edit-name-btn:hover {
+            background: var(--accent);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .profile-title {
+            font-size: 1.2rem;
+            color: var(--accent-dark);
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: rgba(245, 158, 11, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--accent);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent-dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            opacity: 0.7;
+        }
+
+        .start-quiz-btn {
+            padding: 18px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 30px;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .start-quiz-btn:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Игровой экран */
+        .game-screen {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 2px solid var(--accent);
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .answer-btn {
+            padding: 18px 20px;
+            font-size: 1.1rem;
+            border: 2px solid var(--accent);
+            border-radius: 20px;
+            background: white;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .answer-btn:hover {
+            background: rgba(245, 158, 11, 0.1);
+            transform: translateX(5px);
+        }
+
+        .answer-btn.correct {
+            background: var(--correct);
+            border-color: var(--correct);
+            color: white;
+        }
+
+        .answer-btn.wrong {
+            background: var(--wrong);
+            border-color: var(--wrong);
+            color: white;
+        }
+
+        .answer-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .progress-info {
+            text-align: center;
+            font-size: 1rem;
+            color: var(--text-dark);
+            opacity: 0.8;
+        }
+
+        /* Модальное окно */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--overlay);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 30px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            border: 2px solid var(--accent);
+            animation: modalAppear 0.3s ease;
+        }
+
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-dark);
+        }
+
+        .modal-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+            background: transparent;
+            color: var(--accent-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--accent);
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1rem;
+            border: 2px solid var(--accent);
+            border-radius: 20px;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        .modal-input:focus {
+            border-color: var(--accent-dark);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 20px;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn:hover {
+            background: var(--accent-dark);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+
+            .welcome-title {
+                font-size: 2rem;
+            }
+
+            .profile-name h2 {
+                font-size: 1.4rem;
+            }
+
+            .stats-grid {
+                gap: 10px;
+            }
+
+            .stat-item {
+                padding: 15px;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .question-text {
+                font-size: 1.2rem;
+            }
+
+            .answer-btn {
+                padding: 15px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Безопасные зоны */
+        @supports (padding: max(0px)) {
+            .container {
+                padding-left: max(20px, env(safe-area-inset-left));
+                padding-right: max(20px, env(safe-area-inset-right));
+                padding-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+
+            .burger-btn {
+                right: max(20px, env(safe-area-inset-right));
+                top: max(20px, env(safe-area-inset-top));
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- SPLASH SCREEN -->
-    <div id="splashScreen" class="splash-screen">
-        <div class="game-logo" style="animation:glow 2s infinite;">🎮 QUIZQUEST</div>
-        <div class="game-subtitle">ИИ-ВИКТОРИНА</div>
-        <div class="game-characters">
-            <div class="character">👾</div>
-            <div class="character">🎯</div>
-            <div class="character">🧠</div>
-        </div>
-        <div class="pixel-loader">
-            <div class="pixel-dot"></div>
-            <div class="pixel-dot"></div>
-            <div class="pixel-dot"></div>
-            <div class="pixel-dot"></div>
-        </div>
-        <div class="loading-text">ЗАГРУЗКА ВОПРОСОВ...</div>
-    </div>
+    
+<!-- Основной контейнер -->
+<div class="container">
+    <!-- Бургер-меню (изначально скрыто) -->
+    <button class="burger-btn" id="burgerBtn" style="display: none;">
+        <i class="fas fa-bars"></i>
+    </button>
 
-    <!-- MAIN SCREEN -->
-    <div id="mainScreen" class="center screen hidden">
-         <div class="card">
-    <div class="card-title">🎮 QUIZQUEST</div>
-    <p class="small">Добро пожаловать, <span id="playerId">Игрок#1234</span>!</p>
-    <p class="small">Ваш текущий уровень: <span id="playerLevel">—</span></p>
-    <p class="small">Всего сыграно игр: <span id="playerGames">0</span></p>
-    <p class="small">Лучший результат: <span id="playerHighScore">0</span></p>
-    <p class="small">Загружено вопросов: <span id="questionsCount">0</span></p>
-         <div style="margin-top:16px">
-        <button id="toLobbyBtn" class="btn">Играть</button>
-         </div>
-         </div>
-
-    </div>
-
-    <!-- LOBBY -->
-    <div id="lobbyScreen" class="center screen hidden">
-        <div class="card">
-            <div class="card-title">🏁 ЛОББИ</div>
-            <div style="margin-top:16px">
-                <button id="startGameBtn" class="btn">Начать игру</button>
-            </div>
-            <div style="margin-top:12px">
-                <button id="rulesBtn" class="btn ghost">Правила</button>
-                <button id="backBtn" class="btn ghost" style="margin-left:8px">В меню</button>
-            </div>
+    <!-- Экран приветствия -->
+    <div class="welcome-screen" id="welcomeScreen">
+        <h1 class="welcome-title">🎯 Добро пожаловать!</h1>
+        <p class="welcome-subtitle">Назови себя, чтобы начать игру</p>
+        <div class="input-group">
+            <input type="text" class="name-input" id="nameInput" placeholder="Ваше имя" maxlength="20">
+            <button class="save-btn" id="saveNameBtn" disabled>Сохранить</button>
         </div>
     </div>
 
-    <!-- GAME -->
-    <div id="gameScreen" class="center screen hidden" aria-live="polite">
-        <div class="card" style="text-align:left">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div style="font-weight:700;color:#444" class="pixel-font">🎯 ВОПРОС <span id="qIndex">0</span>/<span id="qTotal">0</span>
-                <span id="difficultyIndicator" class="difficulty-indicator"></span>
+    <!-- Экран профиля -->
+    <div class="profile-screen" id="profileScreen">
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-name">
+                    <h2 id="profileName">Игрок</h2>
+                    <button class="edit-name-btn" id="editNameBtn">
+                        <i class="fas fa-pen"></i>
+                    </button>
                 </div>
-                <div id="timer" class="small pixel-font">—</div>
             </div>
-            <div class="small" id="difficultyLabel" style="text-align:center;margin:5px 0;font-weight:bold;"></div>
-            <div id="progressBar" class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
-            <h3 id="questionText" style="margin-top:14px;color:#111;font-weight:700;font-size:15px;line-height:1.4;"></h3>
-            <div id="answers" class="answers"></div>
-            <div style="margin-top:12px; position:relative" class="small pixel-font">
-    ОЧКИ: <span id="scoreLabel">0</span>
-    <span id="scorePlus" class="score-plus">+10</span>
+            <div class="profile-title" id="profileTitle">Новичок</div>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalQuestions">0</div>
+                    <div class="stat-label">Всего вопросов</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="correctAnswers">0</div>
+                    <div class="stat-label">Правильных</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="wrongAnswers">0</div>
+                    <div class="stat-label">Неправильных</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="bestStreak">0</div>
+                    <div class="stat-label">Лучшая серия</div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="start-quiz-btn" id="startQuizBtn">
+            Начать игру <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <!-- Экран игры -->
+    <div class="game-screen" id="gameScreen">
+        <div class="question-card">
+            <div class="question-text" id="questionText">Загрузка вопроса...</div>
+            <div class="answers-grid" id="answersContainer"></div>
+        </div>
+        <div class="progress-info" id="progressInfo">Вопрос 1 из 10</div>
+    </div>
 </div>
-        </div>
-    </div>
 
-    <!-- FINAL -->
-    <div id="finalScreen" class="center screen hidden" aria-live="polite">
-        <div class="card">
-            <div id="finalBoom" class="final-boom">+50!</div>
-            <div class="card-title" id="finalText">РЕЗУЛЬТАТ</div>
-            <div id="bonusText" class="bonus-text pixel-font" style="display:none;"></div>
-            <div style="margin-top:16px">
-                <button id="replayBtn" class="btn">Играть снова</button>
-                <button id="toLobbyBtn2" class="btn ghost" style="margin-left:8px">В лобби</button>
-            </div>
+<!-- Модальное окно для смены имени -->
+<div class="modal-overlay" id="editNameModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Изменить имя</h3>
+            <button class="modal-close" id="closeEditModal">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
+        <input type="text" class="modal-input" id="editNameInput" placeholder="Новое имя" maxlength="20">
+        <button class="modal-btn" id="saveEditNameBtn">Сохранить</button>
     </div>
+</div>
 
-    <!-- RULES MODAL -->
-    <div id="overlay" class="overlay" tabindex="-1" aria-hidden="true"></div>
-    <div id="rulesModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
-        <h3 id="rulesTitle">📜 ПРАВИЛА ИГРЫ</h3>
-        <div class="small" style="text-align:left;line-height:1.5">
-            • 10 вопросов в каждой игре<br>
-            • На ответ — 9 секунд<br>
-            • Ошибка — конец игры<br>
-            • За правильный ответ +10 очков<br>
-            • Все 10 правильно = бонус +50 очков!<br><br>
-            <strong>Сложность вопросов:</strong><br>
-            • 1-3: Легкие<br>
-            • 4-6: Средние<br>
-            • 7-9: Сложные<br>
-            • 10: Ультра-сложный
-        </div>
-        <div style="margin-top:16px;text-align:center">
-            <button id="closeRulesBtn" class="btn ghost">Понятно</button>
-        </div>
-    </div>
+<script>
+    // ---------- Банк вопросов ----------
+    const questions = [
+        {
+            question: "Какая планета называется Красной?",
+            answers: ["Венера", "Марс", "Юпитер", "Сатурн"],
+            correct: 1
+        },
+        {
+            question: "Сколько месяцев в году?",
+            answers: ["10", "11", "12", "13"],
+            correct: 2
+        },
+        {
+            question: "Кто написал 'Войну и мир'?",
+            answers: ["Достоевский", "Толстой", "Пушкин", "Чехов"],
+            correct: 1
+        },
+        {
+            question: "Какой язык программирования используется для веб-разработки?",
+            answers: ["Python", "Java", "JavaScript", "C++"],
+            correct: 2
+        },
+        {
+            question: "Столица Франции?",
+            answers: ["Лондон", "Берлин", "Париж", "Мадрид"],
+            correct: 2
+        },
+        {
+            question: "Сколько ног у паука?",
+            answers: ["6", "8", "10", "12"],
+            correct: 1
+        },
+        {
+            question: "Что такое HTML?",
+            answers: ["Язык программирования", "Язык разметки", "База данных", "Протокол"],
+            correct: 1
+        },
+        {
+            question: "Какой океан самый большой?",
+            answers: ["Атлантический", "Индийский", "Тихий", "Северный Ледовитый"],
+            correct: 2
+        },
+        {
+            question: "Сколько будет 2 + 2 * 2?",
+            answers: ["4", "6", "8", "10"],
+            correct: 1
+        },
+        {
+            question: "Какой цвет получается при смешивании синего и красного?",
+            answers: ["Зеленый", "Фиолетовый", "Оранжевый", "Коричневый"],
+            correct: 1
+        }
+    ];
 
-    <script src="questions.js"></script>
-    <script src="script.js"></script>
+    // ---------- Состояние игры ----------
+    let currentQuestionIndex = 0;
+    let currentStreak = 0;
+    let gameStats = {
+        totalQuestions: 0,
+        correctAnswers: 0,
+        wrongAnswers: 0,
+        bestStreak: 0
+    };
+    let userName = '';
+    let isAnswered = false;
+
+    // ---------- Элементы DOM ----------
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const profileScreen = document.getElementById('profileScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const burgerBtn = document.getElementById('burgerBtn');
+    const nameInput = document.getElementById('nameInput');
+    const saveNameBtn = document.getElementById('saveNameBtn');
+    const profileName = document.getElementById('profileName');
+    const profileTitle = document.getElementById('profileTitle');
+    const totalQuestionsEl = document.getElementById('totalQuestions');
+    const correctAnswersEl = document.getElementById('correctAnswers');
+    const wrongAnswersEl = document.getElementById('wrongAnswers');
+    const bestStreakEl = document.getElementById('bestStreak');
+    const editNameBtn = document.getElementById('editNameBtn');
+    const startQuizBtn = document.getElementById('startQuizBtn');
+    const questionText = document.getElementById('questionText');
+    const answersContainer = document.getElementById('answersContainer');
+    const progressInfo = document.getElementById('progressInfo');
+    
+    // Модальное окно
+    const editNameModal = document.getElementById('editNameModal');
+    const closeEditModal = document.getElementById('closeEditModal');
+    const editNameInput = document.getElementById('editNameInput');
+    const saveEditNameBtn = document.getElementById('saveEditNameBtn');
+
+    // ---------- Функции для работы с localStorage ----------
+    function loadProfile() {
+        const saved = localStorage.getItem('quizProfile');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                userName = data.userName || '';
+                gameStats = data.gameStats || {
+                    totalQuestions: 0,
+                    correctAnswers: 0,
+                    wrongAnswers: 0,
+                    bestStreak: 0
+                };
+                currentQuestionIndex = data.currentQuestionIndex || 0;
+                currentStreak = data.currentStreak || 0;
+                return true;
+            } catch (e) {
+                console.error('Ошибка загрузки профиля', e);
+            }
+        }
+        return false;
+    }
+
+    function saveProfile() {
+        const profile = {
+            userName,
+            gameStats,
+            currentQuestionIndex,
+            currentStreak
+        };
+        localStorage.setItem('quizProfile', JSON.stringify(profile));
+    }
+
+    // ---------- Обновление UI ----------
+    function updateProfileUI() {
+        profileName.textContent = userName;
+        
+        // Определяем титул
+        let title = 'Новичок';
+        if (gameStats.totalQuestions >= 50) title = 'Гений';
+        else if (gameStats.totalQuestions >= 30) title = 'Профессор';
+        else if (gameStats.totalQuestions >= 10) title = 'Знаток';
+        profileTitle.textContent = title;
+
+        totalQuestionsEl.textContent = gameStats.totalQuestions;
+        correctAnswersEl.textContent = gameStats.correctAnswers;
+        wrongAnswersEl.textContent = gameStats.wrongAnswers;
+        bestStreakEl.textContent = gameStats.bestStreak;
+    }
+
+    function showWelcomeScreen() {
+        welcomeScreen.style.display = 'flex';
+        profileScreen.style.display = 'none';
+        gameScreen.style.display = 'none';
+        burgerBtn.style.display = 'none';
+    }
+
+    function showProfileScreen() {
+        welcomeScreen.style.display = 'none';
+        profileScreen.style.display = 'flex';
+        gameScreen.style.display = 'none';
+        burgerBtn.style.display = 'block';
+        updateProfileUI();
+    }
+
+    function showGameScreen() {
+        welcomeScreen.style.display = 'none';
+        profileScreen.style.display = 'none';
+        gameScreen.style.display = 'flex';
+        burgerBtn.style.display = 'block';
+        loadQuestion();
+    }
+
+    // ---------- Загрузка вопроса ----------
+    function loadQuestion() {
+        if (currentQuestionIndex >= questions.length) {
+            // Все вопросы пройдены, показываем результаты
+            alert('Поздравляем! Вы прошли все вопросы!');
+            currentQuestionIndex = 0;
+            saveProfile();
+            showProfileScreen();
+            return;
+        }
+
+        const question = questions[currentQuestionIndex];
+        questionText.textContent = question.question;
+        
+        answersContainer.innerHTML = '';
+        question.answers.forEach((answer, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'answer-btn';
+            btn.textContent = answer;
+            btn.dataset.index = index;
+            btn.addEventListener('click', () => handleAnswer(index));
+            answersContainer.appendChild(btn);
+        });
+
+        progressInfo.textContent = `Вопрос ${currentQuestionIndex + 1} из ${questions.length}`;
+        isAnswered = false;
+    }
+
+    // ---------- Обработка ответа ----------
+    function handleAnswer(selectedIndex) {
+        if (isAnswered) return;
+        
+        const question = questions[currentQuestionIndex];
+        const isCorrect = selectedIndex === question.correct;
+        
+        // Визуальная обратная связь
+        const answerBtns = document.querySelectorAll('.answer-btn');
+        answerBtns.forEach((btn, index) => {
+            btn.disabled = true;
+            if (index === question.correct) {
+                btn.classList.add('correct');
+            } else if (index === selectedIndex && !isCorrect) {
+                btn.classList.add('wrong');
+            }
+        });
+
+        // Обновляем статистику
+        gameStats.totalQuestions++;
+        
+        if (isCorrect) {
+            gameStats.correctAnswers++;
+            currentStreak++;
+            if (currentStreak > gameStats.bestStreak) {
+                gameStats.bestStreak = currentStreak;
+            }
+        } else {
+            gameStats.wrongAnswers++;
+            currentStreak = 0;
+        }
+
+        isAnswered = true;
+        saveProfile();
+
+        // Переход к следующему вопросу через 1 секунду
+        setTimeout(() => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showProfileScreen();
+            }
+        }, 1000);
+    }
+
+    // ---------- Инициализация ----------
+    function init() {
+        const hasProfile = loadProfile();
+        
+        if (hasProfile && userName) {
+            showProfileScreen();
+        } else {
+            showWelcomeScreen();
+        }
+
+        // Активация кнопки сохранения при вводе имени
+        nameInput.addEventListener('input', () => {
+            saveNameBtn.disabled = nameInput.value.trim().length === 0;
+        });
+
+        // Сохранение имени
+        saveNameBtn.addEventListener('click', () => {
+            const name = nameInput.value.trim();
+            if (name) {
+                userName = name;
+                saveProfile();
+                showProfileScreen();
+            }
+        });
+
+        // Кнопка редактирования имени
+        editNameBtn.addEventListener('click', () => {
+            editNameInput.value = userName;
+            editNameModal.classList.add('show');
+        });
+
+        // Закрытие модального окна
+        closeEditModal.addEventListener('click', () => {
+            editNameModal.classList.remove('show');
+        });
+
+        // Сохранение нового имени
+        saveEditNameBtn.addEventListener('click', () => {
+            const newName = editNameInput.value.trim();
+            if (newName) {
+                userName = newName;
+                saveProfile();
+                updateProfileUI();
+                editNameModal.classList.remove('show');
+            }
+        });
+
+        // Закрытие модалки по клику на overlay
+        editNameModal.addEventListener('click', (e) => {
+            if (e.target === editNameModal) {
+                editNameModal.classList.remove('show');
+            }
+        });
+
+        // Начало игры
+        startQuizBtn.addEventListener('click', () => {
+            currentQuestionIndex = 0;
+            currentStreak = 0;
+            showGameScreen();
+        });
+
+        // Бургер-меню (возврат в профиль)
+        burgerBtn.addEventListener('click', () => {
+            showProfileScreen();
+        });
+
+        // Закрытие по ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && editNameModal.classList.contains('show')) {
+                editNameModal.classList.remove('show');
+            }
+        });
+
+        // Telegram Web App интеграция
+        if (window.Telegram && Telegram.WebApp) {
+            Telegram.WebApp.ready();
+            Telegram.WebApp.expand();
+            if (Telegram.WebApp.disableVerticalSwipes) {
+                Telegram.WebApp.disableVerticalSwipes();
+            }
+        }
+
+        // Плавное появление
+        document.body.style.opacity = '0';
+        document.body.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => {
+            document.body.style.opacity = '1';
+        }, 100);
+    }
+
+    init();
+</script>
+
 </body>
 </html>
