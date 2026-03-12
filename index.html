@@ -564,7 +564,7 @@
             <div class="question-text" id="questionText">Загрузка вопроса...</div>
             <div class="answers-grid" id="answersContainer"></div>
         </div>
-        <div class="progress-info" id="progressInfo">Вопрос 1 из 10</div>
+        <div class="progress-info" id="progressInfo">Вопрос 1 из 100</div>
     </div>
 </div>
 
@@ -582,61 +582,10 @@
     </div>
 </div>
 
-<script>
-    // ---------- Банк вопросов ----------
-    const questions = [
-        {
-            question: "Какая планета называется Красной?",
-            answers: ["Венера", "Марс", "Юпитер", "Сатурн"],
-            correct: 1
-        },
-        {
-            question: "Сколько месяцев в году?",
-            answers: ["10", "11", "12", "13"],
-            correct: 2
-        },
-        {
-            question: "Кто написал 'Войну и мир'?",
-            answers: ["Достоевский", "Толстой", "Пушкин", "Чехов"],
-            correct: 1
-        },
-        {
-            question: "Какой язык программирования используется для веб-разработки?",
-            answers: ["Python", "Java", "JavaScript", "C++"],
-            correct: 2
-        },
-        {
-            question: "Столица Франции?",
-            answers: ["Лондон", "Берлин", "Париж", "Мадрид"],
-            correct: 2
-        },
-        {
-            question: "Сколько ног у паука?",
-            answers: ["6", "8", "10", "12"],
-            correct: 1
-        },
-        {
-            question: "Что такое HTML?",
-            answers: ["Язык программирования", "Язык разметки", "База данных", "Протокол"],
-            correct: 1
-        },
-        {
-            question: "Какой океан самый большой?",
-            answers: ["Атлантический", "Индийский", "Тихий", "Северный Ледовитый"],
-            correct: 2
-        },
-        {
-            question: "Сколько будет 2 + 2 * 2?",
-            answers: ["4", "6", "8", "10"],
-            correct: 1
-        },
-        {
-            question: "Какой цвет получается при смешивании синего и красного?",
-            answers: ["Зеленый", "Фиолетовый", "Оранжевый", "Коричневый"],
-            correct: 1
-        }
-    ];
+<!-- Подключение внешнего файла с вопросами -->
+<script src="questions.js"></script>
 
+<script>
     // ---------- Состояние игры ----------
     let currentQuestionIndex = 0;
     let currentStreak = 0;
