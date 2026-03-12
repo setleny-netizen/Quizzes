@@ -163,16 +163,21 @@
             transform: none;
         }
 
-        /* Профиль */
+        /* Профиль (обновленный) */
         .profile-screen {
             flex: 1;
             display: none;
             flex-direction: column;
-            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            min-height: 100%;
             padding: 20px 0;
         }
 
         .profile-card {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
             background: var(--card-bg);
             border-radius: 30px;
             padding: 30px;
@@ -223,37 +228,47 @@
             font-size: 1.2rem;
             color: var(--accent-dark);
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            text-align: center;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+        /* Вертикальный список статистики */
+        .stats-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 20px 0;
         }
 
-        .stat-item {
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
             background: rgba(245, 158, 11, 0.1);
             border-radius: 20px;
-            padding: 20px;
-            text-align: center;
             border: 1px solid var(--accent);
         }
 
-        .stat-value {
-            font-size: 2rem;
+        .stat-row .stat-label {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .stat-row .stat-value {
+            font-size: 1.5rem;
             font-weight: 800;
             color: var(--accent-dark);
-            margin-bottom: 5px;
         }
 
-        .stat-label {
-            font-size: 0.9rem;
-            color: var(--text-dark);
-            opacity: 0.7;
-        }
-
+        /* Кнопка начала игры (прижата к низу) */
         .start-quiz-btn {
+            position: sticky;
+            bottom: 20px;
+            width: 100%;
+            max-width: 400px;
+            margin-top: auto;
             padding: 18px;
             font-size: 1.3rem;
             font-weight: 700;
@@ -263,13 +278,12 @@
             color: white;
             cursor: pointer;
             transition: all 0.2s ease;
-            margin-top: 10px;
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
         }
 
         .start-quiz-btn:hover {
             background: var(--accent-dark);
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
         }
 
         /* Игровой экран */
@@ -464,16 +478,12 @@
                 font-size: 1.4rem;
             }
 
-            .stats-grid {
-                gap: 10px;
+            .stat-row {
+                padding: 12px;
             }
 
-            .stat-item {
-                padding: 15px;
-            }
-
-            .stat-value {
-                font-size: 1.5rem;
+            .stat-row .stat-value {
+                font-size: 1.3rem;
             }
 
             .question-text {
@@ -520,7 +530,7 @@
         </div>
     </div>
 
-    <!-- Экран профиля -->
+    <!-- Экран профиля (обновленный) -->
     <div class="profile-screen" id="profileScreen">
         <div class="profile-card">
             <div class="profile-header">
@@ -533,22 +543,22 @@
             </div>
             <div class="profile-title" id="profileTitle">Новичок</div>
             
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-value" id="totalQuestions">0</div>
-                    <div class="stat-label">Всего вопросов</div>
+            <div class="stats-list">
+                <div class="stat-row">
+                    <span class="stat-label">Всего вопросов</span>
+                    <span class="stat-value" id="totalQuestions">0</span>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="correctAnswers">0</div>
-                    <div class="stat-label">Правильных</div>
+                <div class="stat-row">
+                    <span class="stat-label">Правильных</span>
+                    <span class="stat-value" id="correctAnswers">0</span>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="wrongAnswers">0</div>
-                    <div class="stat-label">Неправильных</div>
+                <div class="stat-row">
+                    <span class="stat-label">Неправильных</span>
+                    <span class="stat-value" id="wrongAnswers">0</span>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="bestStreak">0</div>
-                    <div class="stat-label">Лучшая серия</div>
+                <div class="stat-row">
+                    <span class="stat-label">Лучшая серия</span>
+                    <span class="stat-value" id="bestStreak">0</span>
                 </div>
             </div>
         </div>
@@ -699,11 +709,23 @@
     // ---------- Загрузка вопроса ----------
     function loadQuestion() {
         if (currentQuestionIndex >= questions.length) {
-            // Все вопросы пройдены, показываем результаты
-            alert('Поздравляем! Вы прошли все вопросы!');
-            currentQuestionIndex = 0;
-            saveProfile();
-            showProfileScreen();
+            // Все вопросы пройдены
+            alert('Вы ответили на все вопросы! Хотите начать сначала?');
+            if (confirm('Начать новую игру?')) {
+                // Сбрасываем прогресс
+                currentQuestionIndex = 0;
+                currentStreak = 0;
+                gameStats = {
+                    totalQuestions: 0,
+                    correctAnswers: 0,
+                    wrongAnswers: 0,
+                    bestStreak: 0
+                };
+                saveProfile();
+                loadQuestion();
+            } else {
+                showProfileScreen();
+            }
             return;
         }
 
@@ -765,6 +787,8 @@
             if (currentQuestionIndex < questions.length) {
                 loadQuestion();
             } else {
+                // Все вопросы пройдены, показываем сообщение
+                alert('Поздравляем! Вы ответили на все вопросы!');
                 showProfileScreen();
             }
         }, 1000);
@@ -824,10 +848,24 @@
             }
         });
 
-        // Начало игры
+        // Начало игры - теперь НЕ сбрасываем индекс!
         startQuizBtn.addEventListener('click', () => {
-            currentQuestionIndex = 0;
-            currentStreak = 0;
+            // Проверяем, есть ли еще вопросы
+            if (currentQuestionIndex >= questions.length) {
+                if (confirm('Все вопросы уже отвечены. Начать новую игру?')) {
+                    currentQuestionIndex = 0;
+                    currentStreak = 0;
+                    gameStats = {
+                        totalQuestions: 0,
+                        correctAnswers: 0,
+                        wrongAnswers: 0,
+                        bestStreak: 0
+                    };
+                    saveProfile();
+                } else {
+                    return;
+                }
+            }
             showGameScreen();
         });
 
