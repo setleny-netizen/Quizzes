@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Викторина</title>
+    <title>QuizQuest - Викторина</title>
     
     <!-- Шрифты и иконки -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -163,6 +163,18 @@
             transform: none;
         }
 
+        /* Логотип */
+        .logo {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
         /* Профиль (обновленный) */
         .profile-screen {
             flex: 1;
@@ -189,7 +201,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .profile-name {
@@ -225,11 +237,12 @@
         }
 
         .profile-title {
-            font-size: 1.2rem;
+            font-size: 0.9rem;
             color: var(--accent-dark);
-            font-weight: 600;
+            font-weight: 400;
             margin-bottom: 30px;
-            text-align: center;
+            text-align: left;
+            opacity: 0.8;
         }
 
         /* Вертикальный список статистики */
@@ -286,38 +299,44 @@
             transform: translateY(-2px);
         }
 
-        /* Игровой экран */
+        /* Игровой экран (обновленный) */
         .game-screen {
             flex: 1;
             display: none;
             flex-direction: column;
-            gap: 20px;
+            justify-content: space-between;
             padding: 20px 0;
+            min-height: 100%;
         }
 
-        .question-card {
-            background: var(--card-bg);
-            border-radius: 30px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border: 2px solid var(--accent);
+        .question-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
         }
 
         .question-text {
-            font-size: 1.4rem;
-            font-weight: 600;
+            font-size: 1.6rem;
+            font-weight: 700;
             line-height: 1.5;
-            margin-bottom: 20px;
             color: var(--text-dark);
+            text-align: center;
+            padding: 20px;
         }
 
-        .answers-grid {
-            display: grid;
-            grid-template-columns: 1fr;
+        .answers-container {
+            display: flex;
+            flex-direction: column;
             gap: 12px;
+            width: 100%;
+            margin-top: auto;
+            padding-bottom: 20px;
         }
 
         .answer-btn {
+            width: 100%;
             padding: 18px 20px;
             font-size: 1.1rem;
             border: 2px solid var(--accent);
@@ -350,13 +369,6 @@
         .answer-btn:disabled {
             opacity: 0.7;
             cursor: not-allowed;
-        }
-
-        .progress-info {
-            text-align: center;
-            font-size: 1rem;
-            color: var(--text-dark);
-            opacity: 0.8;
         }
 
         /* Модальное окно */
@@ -474,6 +486,10 @@
                 font-size: 2rem;
             }
 
+            .logo {
+                font-size: 2.5rem;
+            }
+
             .profile-name h2 {
                 font-size: 1.4rem;
             }
@@ -487,7 +503,7 @@
             }
 
             .question-text {
-                font-size: 1.2rem;
+                font-size: 1.4rem;
             }
 
             .answer-btn {
@@ -532,6 +548,9 @@
 
     <!-- Экран профиля (обновленный) -->
     <div class="profile-screen" id="profileScreen">
+        <!-- Логотип -->
+        <div class="logo">QuizQuest</div>
+        
         <div class="profile-card">
             <div class="profile-header">
                 <div class="profile-name">
@@ -541,7 +560,7 @@
                     </button>
                 </div>
             </div>
-            <div class="profile-title" id="profileTitle">Новичок</div>
+            <div class="profile-title" id="profileTitle">🐣 Новичок</div>
             
             <div class="stats-list">
                 <div class="stat-row">
@@ -568,13 +587,15 @@
         </button>
     </div>
 
-    <!-- Экран игры -->
+    <!-- Экран игры (обновленный) -->
     <div class="game-screen" id="gameScreen">
-        <div class="question-card">
+        <!-- Вопрос (отдельно) -->
+        <div class="question-container">
             <div class="question-text" id="questionText">Загрузка вопроса...</div>
-            <div class="answers-grid" id="answersContainer"></div>
         </div>
-        <div class="progress-info" id="progressInfo">Вопрос 1 из 100</div>
+        
+        <!-- Ответы (4 отдельных блока внизу) -->
+        <div class="answers-container" id="answersContainer"></div>
     </div>
 </div>
 
@@ -625,7 +646,6 @@
     const startQuizBtn = document.getElementById('startQuizBtn');
     const questionText = document.getElementById('questionText');
     const answersContainer = document.getElementById('answersContainer');
-    const progressInfo = document.getElementById('progressInfo');
     
     // Модальное окно
     const editNameModal = document.getElementById('editNameModal');
@@ -670,11 +690,11 @@
     function updateProfileUI() {
         profileName.textContent = userName;
         
-        // Определяем титул
-        let title = 'Новичок';
-        if (gameStats.totalQuestions >= 50) title = 'Гений';
-        else if (gameStats.totalQuestions >= 30) title = 'Профессор';
-        else if (gameStats.totalQuestions >= 10) title = 'Знаток';
+        // Определяем титул со смайликом
+        let title = '🐣 Новичок';
+        if (gameStats.totalQuestions >= 50) title = '🧠 Гений';
+        else if (gameStats.totalQuestions >= 30) title = '👨‍🏫 Профессор';
+        else if (gameStats.totalQuestions >= 10) title = '🧐 Знаток';
         profileTitle.textContent = title;
 
         totalQuestionsEl.textContent = gameStats.totalQuestions;
@@ -694,7 +714,7 @@
         welcomeScreen.style.display = 'none';
         profileScreen.style.display = 'flex';
         gameScreen.style.display = 'none';
-        burgerBtn.style.display = 'block';
+        burgerBtn.style.display = 'none'; // Бургер скрыт на экране профиля
         updateProfileUI();
     }
 
@@ -702,7 +722,7 @@
         welcomeScreen.style.display = 'none';
         profileScreen.style.display = 'none';
         gameScreen.style.display = 'flex';
-        burgerBtn.style.display = 'block';
+        burgerBtn.style.display = 'block'; // Бургер показан только на экране игры
         loadQuestion();
     }
 
@@ -742,7 +762,6 @@
             answersContainer.appendChild(btn);
         });
 
-        progressInfo.textContent = `Вопрос ${currentQuestionIndex + 1} из ${questions.length}`;
         isAnswered = false;
     }
 
